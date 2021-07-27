@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         KinhDown Auto Refresh
-// @namespace    http://pan.akcsss.cn/
-// @version      0.2
+// @namespace    https://github.com/zhangsean/userscripts/
+// @version      0.3
 // @description  Auto refresh page to get valid download link.
 // @author       zhangsean
 // @match        http://pan.akcsss.cn/?download
