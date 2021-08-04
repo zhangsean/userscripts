@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         bilibili-game-guess-analyse
 // @namespace    https://github.com/zhangsean/userscripts/
-// @version      2.1
+// @version      2.2
 // @description  分析B站游戏竞猜历史，看看你的竞猜回报率。
 // @author       ZhangSean
 // @icon         https://static.hdslb.com/images/favicon.ico
@@ -23,13 +23,13 @@
         XLSX.writeFile(workbook, fileName);
     }
 
-    function waitRecord(n) {
-        timer(n).then(()=>{
+    function waitRecord() {
+        timer(50).then(()=>{
             if (pn == dataPn) {
                 getRecord(++pn);
             }
             if (hasMore) {
-                waitRecord(n);
+                waitRecord();
             }
         });
     }
@@ -81,7 +81,7 @@
         pn = 0;
         dataPn = 0;
         hasMore = true;
-        waitRecord(50);
+        waitRecord();
         until(()=>(!hasMore && records > 0 && data.length == records), ()=>{
             data.unshift(['队伍','时间','赔率1','赔率2','胜利队伍','胜利赔率','投注队伍','投注赔率','投注','收入','赔率倍数','是否优胜','优胜赔率','非优胜赔率']);
             let count = data.length - 1, allWinOdds = 0, myWin = 0, allStake = 0, allIncome = 0, goodWin = 0, allGoodOdds = 0, allBadOdds = 0;
