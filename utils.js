@@ -1,9 +1,14 @@
 /**
  * user script utils
- * v0.1
+ * v0.2.1
  * Copyright © 2021 Sean Zhang
  */
 'use strict';
+
+/**
+ * 控制台打印日志
+ */
+const log = console.log;
 
 /**
  * 返回指定表达式的首个DOM元素
@@ -22,7 +27,7 @@ const $ = (selector, el) => (el || document).querySelector(selector);
 const $$ = (selector, el) => [...(el || document).querySelectorAll(selector)];
 
 /**
- * 执行GM异步请求，返回Json内容回调指定方法
+ * 执行GM异步请求，返回Json内容回调指定函数
  * @param {string} u 请求的URL
  * @param {function} f 请求完成后的处理逻辑，参数 responseJson || responseBody
  * @returns ajaxRequest
@@ -31,12 +36,12 @@ const gm = (u, f) => GM_xmlhttpRequest({url: u, onload: (xhr) => {let t=xhr.resp
 
 /**
  * 循环定时判断，直到满足指定条件后执行任务
- * @example until('$$(".list").length > 0', ()=>{console.log('ajax list ok')});
- * @param {string} c 判断条件
- * @param {function} f 条件满足后执行的方法
- * @param {int} ms 循环判断间隔，默认100毫秒
+ * @example until(()=>$$(".list").length > 0, ()=>{console.log('ajax list ok')});
+ * @param {function} c 返回判断结果的函数
+ * @param {function} f 条件满足后执行的函数
+ * @param {int} ms 循环判断间隔，默认10毫秒
  */
-const until = (c, f, ms) => {ms=ms||10;let tid = setInterval(()=>{if(eval(c)){clearInterval(tid);f();}},ms)};
+const until = (c, f, ms) => {ms=ms||10;let tid = setInterval(()=>{if(c()){clearInterval(tid);f();}},ms)};
 
 /**
  * 定时 n 毫秒后执行任务
