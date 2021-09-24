@@ -1,13 +1,13 @@
 // ==UserScript==
 // @name         bilibili-game-guess-analyse
 // @namespace    https://github.com/zhangsean/userscripts/
-// @version      2.2
+// @version      2.3.0
 // @description  分析B站游戏竞猜历史，看看你的竞猜回报率。
 // @author       ZhangSean
 // @icon         https://static.hdslb.com/images/favicon.ico
-// @run-at       document-idle
+// @run-at       document-ready
 // @grant        GM_xmlhttpRequest
-// @match        https://www.bilibili.com/v/game/match/competition
+// @match        https://www.bilibili.com/v/game/match/*
 // @require      https://raw.fastgit.org/zhangsean/userscripts/master/utils.js
 // @require      https://cdn.bootcdn.net/ajax/libs/xlsx/0.17.0/xlsx.core.min.js
 // ==/UserScript==
@@ -102,15 +102,18 @@
 
     function init() {
         // 投注列表显示下载链接
-        let div = $('.part-title .clear-fix > div');
-        let a = document.createElement("a");
-        a.innerText = '下载投注分析 ';
-        a.addEventListener('click', analyse);
-        div.insertBefore(a, div.childNodes[0]);
+        let div = $('.part-title');
+        if (div) {
+          let a = document.createElement("a");
+          a.style.cssText = 'display: block; text-align: right;'
+          a.innerText = '下载投注分析 ';
+          a.addEventListener('click', analyse);
+          div.appendChild(a);
+        }
 
         // 竞赛列表显示赔率倍数
-        until(()=>$$('.competition-list > li').length > 0, ()=>{
-            let lis = $$('.competition-list > li');
+        until(()=>$$('.competition-list > li,.competition-list > div').length > 0, ()=>{
+            let lis = $$('.competition-list > li,.competition-list > div');
             for (let i in lis) {
                 let li = lis[i],
                     title = $('.part-title > h3', li),
