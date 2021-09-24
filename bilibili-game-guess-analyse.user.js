@@ -9,7 +9,7 @@
 // @grant        GM_xmlhttpRequest
 // @match        https://www.bilibili.com/v/game/match/competition
 // @require      https://raw.fastgit.org/zhangsean/userscripts/master/utils.js
-// @require      https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.core.min.js
+// @require      https://cdn.bootcdn.net/ajax/libs/xlsx/0.17.0/xlsx.core.min.js
 // ==/UserScript==
 
 (function () {
