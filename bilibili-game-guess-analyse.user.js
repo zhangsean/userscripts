@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         bilibili-game-guess-analyse
 // @namespace    https://github.com/zhangsean/userscripts/
-// @version      2.3.0
+// @version      2.3.1
 // @description  分析B站游戏竞猜历史，看看你的竞猜回报率。
 // @author       ZhangSean
 // @icon         https://static.hdslb.com/images/favicon.ico
@@ -10,6 +10,9 @@
 // @match        https://www.bilibili.com/v/game/match/*
 // @require      https://raw.fastgit.org/zhangsean/userscripts/master/utils.js
 // @require      https://cdn.bootcdn.net/ajax/libs/xlsx/0.17.0/xlsx.core.min.js
+// @updateURL    https://github.com/zhangsean/userscripts/raw/master/bilibili-game-guess-analyse.user.js
+// @downloadURL  https://github.com/zhangsean/userscripts/raw/master/bilibili-game-guess-analyse.user.js
+// @supportURL   https://github.com/zhangsean/userscripts/issues
 // ==/UserScript==
 
 (function () {
