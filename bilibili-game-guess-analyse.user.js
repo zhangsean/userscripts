@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         bilibili-game-guess-analyse
 // @namespace    https://github.com/zhangsean/userscripts/
-// @version      2.3.1
+// @version      2.3.2
 // @description  分析B站游戏竞猜历史，看看你的竞猜回报率。
 // @author       ZhangSean
 // @icon         https://static.hdslb.com/images/favicon.ico
@@ -53,7 +53,7 @@
                 let info = [g.title.replace(' 的胜者是？', ''), new Date(g.stime * 1000)];
                 gm(`${matchUrl}${g.oid}`, (matchJson) => {
                     let bigOdds = 0, smallOdds = 0, winOdds = 0, smallWin = 0;
-                    if (!!matchJson.data) {
+                    if (matchJson.data.guess.length > 0) {
                         let details = matchJson.data.guess[0].details;
                         winOdds = details[g.title.indexOf(g.right_option) == 0 ? 0 : 1].odds;
                         bigOdds = details[0].odds > details[1].odds ? details[0].odds : details[1].odds;
