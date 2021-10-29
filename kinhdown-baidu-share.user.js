@@ -4,11 +4,11 @@
 // @description KinhDown Script for baidu yun share.
 // @match       https://pan.baidu.com/share/init*
 // @icon        https://pan.baidu.com/m-static/base/static/images/favicon.ico
-// @updateURL   https://github.com/zhangsean/userscripts/raw/master/kinhdown-baidu-share.user.js
-// @downloadURL https://github.com/zhangsean/userscripts/raw/master/kinhdown-baidu-share.user.js
+// @updateURL   https://cdn.jsdelivr.net/gh/zhangsean/userscripts/kinhdown-baidu-share.user.js
+// @downloadURL https://cdn.jsdelivr.net/gh/zhangsean/userscripts/kinhdown-baidu-share.user.js
 // @supportURL  https://github.com/zhangsean/userscripts/issues
 // @grant       none
-// @version     1.2
+// @version     1.3
 // @author      zhangsean
 // ==/UserScript==
 
