@@ -8,7 +8,7 @@
 // @downloadURL https://github.com/zhangsean/userscripts/raw/master/kinhdown-baidu-share.user.js
 // @supportURL  https://github.com/zhangsean/userscripts/issues
 // @grant       none
-// @version     1.0
+// @version     1.1
 // @author      zhangsean
 // ==/UserScript==
 
@@ -47,7 +47,14 @@
         btn.onclick = function() {
             let code = ipt.value
             if (!!code && code.length == 4) {
-                let aim = 'https://baidu.kinh.cc/?key=' + key + ',提取码' + code
+                let txt = key + ',提取码' + code
+                ipt.value = txt
+                ipt.select()
+                if(!document.execCommand("copy")) {
+                  alert('自动复制失败，请手工复制')
+                }
+                ipt.value = code
+                let aim = 'https://baidu.kinh.cc/?s=' + txt
                 window.open(aim)
             }
         }
