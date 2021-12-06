@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name        GitHub forks analyse
-// @version     0.4.0
+// @version     0.4.1
 // @description A userscript that analyzes GitHub forks, shows compare info between fork repos and parent repo, helps you to find out the worthiest fork.
 // @license     MIT
 // @author      Sean Zhang
@@ -72,9 +72,9 @@
                 let compare = html.substring(i + 12, html.indexOf('.', i)),
                     branch = compare.split(':')[1];
                 compare = compare.substring(0, compare.lastIndexOf(' '));
-                let e = compare.indexOf('even');
+                let e = compare.indexOf('up to date');
                 if (e > -1) {
-                    compare = compare.replace('even with', '<b>even commit</b>');
+                    compare = compare.replace('up to date with', '<b>even commit</b>');
                 }
                 let a = compare.indexOf('ahead');
                 if (a > -1) {
