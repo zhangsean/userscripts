@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name        GitHub forks analyse
-// @version     0.4.1
+// @version     0.4.2
 // @description A userscript that analyzes GitHub forks, shows compare info between fork repos and parent repo, helps you to find out the worthiest fork.
 // @license     MIT
 // @author      Sean Zhang
@@ -68,6 +68,7 @@
             }
             // Get fork compare info
             let i = html.indexOf('This branch is');
+            i = html.indexOf('This branch is', i + 1);
             if (i > -1) {
                 let compare = html.substring(i + 12, html.indexOf('.', i)),
                     branch = compare.split(':')[1];
@@ -76,8 +77,9 @@
                 if (e > -1) {
                     compare = compare.replace('up to date with', '<b>even commit</b>');
                 }
-                let a = compare.indexOf('ahead');
-                if (a > -1) {
+                let a = compare.indexOf('ahead'),
+                    a0 = compare.indexOf('not ahead');
+                if (a > -1 && a0 == -1) {
                     let num = compare.substring(compare.lastIndexOf('is', a) + 3, a + 5);
                     compare = compare.replace(num, '<b style="color:red;"> ' + num + ' </b>');
                 }
@@ -90,8 +92,10 @@
                     let num = compare.substring(d + 2, b + 6);
                     compare = compare.replace(num, '<b style="color:#01cc1b;"> ' + num + ' </b>');
                 }
-                let user = repo.split('/')[0];
-                el.analyseCommit = ', ' + compare.replace('is', '') + ' ' + `<a target=_blank href="https://github.com/${parentRepo}/compare/${branch}...${user}:${branch}">Compare</a>`;
+                let info = repo.split('/'),
+                    user = info[0],
+                    proj = info[1];
+                el.analyseCommit = ', ' + compare.replace('is', '') + ' ' + `<a target=_blank href="https://github.com/${parentRepo}/compare/${branch}...${user}:${proj}:${branch}">Compare</a>`;
             }
             // Get latest commit time
             i = html.indexOf('tree-commit');
