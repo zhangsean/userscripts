@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name        GitHub forks analyse
-// @version     0.4.2
+// @version     0.5.1
 // @description A userscript that analyzes GitHub forks, shows compare info between fork repos and parent repo, helps you to find out the worthiest fork.
 // @license     MIT
 // @author      Sean Zhang
@@ -11,7 +11,8 @@
 // @icon        https://github.githubassets.com/pinned-octocat.svg
 // @updateURL   https://github.com/zhangsean/userscripts/raw/master/github-fork-analyse.user.js
 // @downloadURL https://github.com/zhangsean/userscripts/raw/master/github-fork-analyse.user.js
-// @supportURL  https://github.com/zhangsean/GitHub-userscripts/issues
+// @supportURL  https://github.com/zhangsean/userscripts/issues
+// @testURL     https://github.com/zhangsean/docker-frp/network/members
 // ==/UserScript==
 
 (function() {
@@ -28,14 +29,18 @@
 
     const show=(el,html)=>{el.innerHTML+=", "+html};
 
-    const color=(msg,type=0)=>(", <b"+(0==type?"":' style="color:'+(type>0?"red":"#01cc1b")+';"')+">"+msg+"</b>");
+    const color=(msg,type=0)=>(", <span"+(0==type?"":' style="color:'+(type>0?"red":"#01cc1b")+';"')+">"+msg+"</span>");
+
+    const log=console.log;
 
     var myDt = 0; // Latest commit time of current repo
     var parentRepo = ''; // Parent repo
     var limitError = 'Whoa there!';
 
     function analyseDate (el, ix, html) {
-        let i = html.indexOf('datetime');
+        // Get latest commit time
+        let i = html.indexOf('datetime'),
+            t = html.indexOf('tree-commit');
         if (i > -1) {
             let dt = html.substring(i + 10, html.indexOf('"', i + 10));
             dt = new Date(dt);
@@ -45,71 +50,97 @@
                 show(el, el.latestDate);
             } else {
                 let df = Math.round((dt - myDt) / 86400000, 0);
-                el.analyseDate = color((df == 0 ? 'same day' : (Math.abs(df) + ' day' + (Math.abs(df) > 1 ? 's' : '') + (df > 0 ? ' ahead' : ' behind'))), df);
-                show(el, el.latestDate + el.analyseDate + el.analyseCommit);
+                el.analyseDate = color((df == 0 ? 'up to date' : (Math.abs(df) + ' day' + (Math.abs(df) > 1 ? 's' : '') + (df > 0 ? ' ahead' : ' behind'))), df);
+                show(el, el.latestDate + el.analyseDate + el.compareLink);
             }
+        } else if (t > -1) {
+            let link = html.substring(html.lastIndexOf('"', t) + 1, html.indexOf('"', t));
+            gm(`https://github.com${link}`, (html)=>{
+                analyseDate (el, ix, html);
+            });
         }
     }
 
     function analyse(el, ix) {
         if(!myDt && ix > 0) {
-            sleep(200).then(()=>analyse(el, ix));
+            sleep(100).then(()=>analyse(el, ix));
             return;
         }
         // Get fork repo info
         let repo = $('a:last-child', el).attributes.href.nodeValue.substr(1);
+        let info = repo.split('/'),
+            user = info[0],
+            proj = info[1];
+        //if (user != 'zhangsean' && user != 'jayagami' && user != 'adminidor') return;
         gm(`https://github.com/${repo}`, (html)=>{
+            log(user, proj)
             // Meet Github limits
             let e = html.indexOf(limitError);
             if (e > -1) {
-                console.log(limitError, html);
+                log(limitError, html);
                 show(el, color(limitError, -1), 1);
                 return;
             }
             // Get fork compare info
             let i = html.indexOf('This branch is');
-            i = html.indexOf('This branch is', i + 1);
-            if (i > -1) {
-                let compare = html.substring(i + 12, html.indexOf('.', i)),
-                    branch = compare.split(':')[1];
-                compare = compare.substring(0, compare.lastIndexOf(' '));
-                let e = compare.indexOf('up to date');
-                if (e > -1) {
-                    compare = compare.replace('up to date with', '<b>even commit</b>');
-                }
-                let a = compare.indexOf('ahead'),
-                    a0 = compare.indexOf('not ahead');
-                if (a > -1 && a0 == -1) {
-                    let num = compare.substring(compare.lastIndexOf('is', a) + 3, a + 5);
-                    compare = compare.replace(num, '<b style="color:red;"> ' + num + ' </b>');
-                }
-                let b = compare.indexOf('behind');
-                if (b > -1) {
-                    let d = compare.lastIndexOf(',', b);
-                    if (d == -1) {
-                        d = compare.lastIndexOf('is', b) + 1;
-                    }
-                    let num = compare.substring(d + 2, b + 6);
-                    compare = compare.replace(num, '<b style="color:#01cc1b;"> ' + num + ' </b>');
-                }
-                let info = repo.split('/'),
-                    user = info[0],
-                    proj = info[1];
-                el.analyseCommit = ', ' + compare.replace('is', '') + ' ' + `<a target=_blank href="https://github.com/${parentRepo}/compare/${branch}...${user}:${proj}:${branch}">Compare</a>`;
-            }
-            // Get latest commit time
-            i = html.indexOf('tree-commit');
-            if (i > -1) {
-                let link = html.substring(html.lastIndexOf('"', i) + 1, html.indexOf('"', i));
-                gm(`https://github.com${link}`, (html)=>{
-                    analyseDate (el, ix, html);
-                });
-            } else {
+            log('i=', i);
+            if (i == -1) {
+                // The root repo
                 analyseDate (el, ix, html);
+            } else {
+                let e = html.indexOf('up to date');
+                if (e > -1) {
+                    el.compareLink = ', even commit';
+                    analyseDate (el, ix, html);
+                } else {
+                    let compareLink = '';
+                    let compare = html.substring(html.indexOf('href', i), html.indexOf('>.', i)),
+                        branch = compare.substring(compare.lastIndexOf(' '), compare.indexOf('</span')).split(':')[1];
+                    compare = compare.substring(0, compare.lastIndexOf(' '));
+                    log('compare=', compare)
+                    log('branch=', branch)
+                    let b = compare.indexOf('behind');
+                    if (b > -1) {
+                        let d = compare.lastIndexOf('">', b);
+                        if (d == -1) {
+                            d = compare.lastIndexOf('is', b) + 1;
+                        }
+                        let link = compare.substring(compare.lastIndexOf('href', b), compare.indexOf('</a>', b) + 4),
+                            num = link.substring(link.indexOf('">') + 2, b + 6);
+                        compareLink = ', <a target=_blank style="color:#01cc1b;" ' + link;
+                    }
+                    let a = compare.indexOf('ahead');
+                    if (a > -1) {
+                        let link = compare.substring(compare.lastIndexOf('href', a), compare.indexOf('</a>', a) + 4),
+                            num = link.substring(link.indexOf('">') + 2, a + 5),
+                            href = link.substring(link.indexOf('"') + 1, link.lastIndexOf('"'));
+                        log('ahead num=', num)
+                        log('href=', href)
+                        gm(`https://github.com${href}`, (cHtml)=>{
+                            let f = cHtml.indexOf('changed</'),
+                                f2 = cHtml.indexOf('Files changed'),
+                                files = 0;
+                            log('f=', f)
+                            if (f > -1) {
+                                files = cHtml.substring(cHtml.lastIndexOf('text-emphasized', f) + 17, cHtml.lastIndexOf('</span>', f) - 3).trim()
+                            } else if (f2 > -1) {
+                                files = cHtml.substring(cHtml.indexOf('>', f2) + 1, cHtml.indexOf('</', f2))
+                            }
+                            log('files=', files, user)
+                            compareLink += ', <a target=_blank ' + link.replace(num, '<b style="color:red;"> ' + num + ` ( ${files} files changed)` + '</b>');
+                            el.compareLink = compareLink;
+                            log('compareLink=', el.compareLink)
+                            analyseDate (el, ix, html);
+                        });
+                    } else {
+                        el.compareLink = compareLink;
+                        log('compareLink=', el.compareLink)
+                        analyseDate (el, ix, html);
+                    }
+                }
             }
         });
     }
-
     function init() {
         const root = $(".network");
         const repos = $$(".network .repo");
@@ -118,8 +149,8 @@
             parentRepo = $('a:last-child', repos[0]).attributes.href.nodeValue.substr(1);
 
             repos.forEach((el, i)=>{
-                // Delay 1 minute every 100 requests to avoid Github limits
-                sleep(i + (Math.floor(i / 100) * 60000)).then(()=>analyse(el, i));
+                // Delay 1 minute every 60 requests to avoid Github limits
+                sleep(i + (Math.floor(i / 60) * 60000)).then(()=>analyse(el, i));
             });
 
         }
